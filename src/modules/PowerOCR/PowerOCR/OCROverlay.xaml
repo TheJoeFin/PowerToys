@@ -9,7 +9,6 @@
     Width="200"
     Height="200"
     AllowsTransparency="True"
-    Background="Transparent"
     Loaded="Window_Loaded"
     ResizeMode="NoResize"
     ShowActivated="False"
@@ -21,9 +20,7 @@
     WindowStyle="None"
     mc:Ignorable="d">
     <Grid>
-        <Viewbox>
-            <Image x:Name="BackgroundImage" Stretch="UniformToFill" />
-        </Viewbox>
+        <Image x:Name="BackgroundImage" Stretch="UniformToFill" />
         <Canvas
             Name="RegionClickCanvas"
             Cursor="Cross"
