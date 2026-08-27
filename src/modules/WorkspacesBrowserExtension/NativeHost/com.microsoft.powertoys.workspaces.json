@@ -1,0 +1,10 @@
+{
+  "name": "com.microsoft.powertoys.workspaces",
+  "description": "PowerToys Workspaces browser tab sync host",
+  "path": "D:\\source\\PowerToys\\src\\modules\\WorkspacesBrowserExtension\\NativeHost\\bin\\ARM64\\Debug\\net10.0-windows\\PowerToys.WorkspacesBrowserSync.exe",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://klgcdapifhnpjjegiklkpcdndmmeihob/"
+  ]
+}
+

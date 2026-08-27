@@ -1,0 +1,9 @@
+{
+  "name": "com.microsoft.powertoys.workspaces",
+  "description": "PowerToys Workspaces browser tab sync host",
+  "path": "REPLACED_WITH_ABSOLUTE_EXE_PATH",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://REPLACED_WITH_EXTENSION_ID/"
+  ]
+}

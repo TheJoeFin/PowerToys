@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Native messaging host for the Workspaces Tab Sync browser extension.
+
+    This is an experimental, standalone console exe. It intentionally opts out of the
+    repo-wide Directory.Build.props/targets (analyzers, StyleCop, warnings-as-errors,
+    central package management) so it builds and can be removed in isolation while the
+    browser-sync idea is validated — mirroring the WorkspaceTasks experiment.
+  -->
+  <PropertyGroup>
+    <ImportDirectoryBuildProps>false</ImportDirectoryBuildProps>
+    <ImportDirectoryBuildTargets>false</ImportDirectoryBuildTargets>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Platforms>x64;ARM64</Platforms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>PowerToys.WorkspacesBrowserSync</AssemblyName>
+    <RootNamespace>WorkspacesBrowserSync</RootNamespace>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "PowerToys Workspaces – Tab Sync",
+  "version": "0.1.0",
+  "description": "Sends the current browser window's open tabs to the PowerToys Workspaces editor so they can be saved with a workspace and reopened on launch.",
+  "permissions": ["tabs", "nativeMessaging"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Sync tabs to PowerToys Workspaces"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}
