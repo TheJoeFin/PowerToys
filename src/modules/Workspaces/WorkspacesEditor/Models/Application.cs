@@ -276,6 +276,15 @@ namespace WorkspacesEditor.Models
             OnPropertyChanged(new PropertyChangedEventArgs(nameof(AppMainParams)));
         }
 
+        // Used when the value is changed programmatically (e.g. browser tab sync) rather than typed
+        // into the bound text box, so the two-way-bound editor field refreshes as well.
+        internal void SetCommandLineArguments(string newCommandLineValue)
+        {
+            CommandLineArguments = newCommandLineValue;
+            OnPropertyChanged(new PropertyChangedEventArgs(nameof(CommandLineArguments)));
+            OnPropertyChanged(new PropertyChangedEventArgs(nameof(AppMainParams)));
+        }
+
         public string Version { get; set; }
     }
 }

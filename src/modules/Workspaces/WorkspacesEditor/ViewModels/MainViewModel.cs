@@ -41,6 +41,8 @@ namespace WorkspacesEditor.ViewModels
         private WorkspacesSettings settings;
         private PwaHelper _pwaHelper;
         private bool _isExistingProjectLaunched;
+        private BrowserTabSyncWatcher _browserTabSyncWatcher;
+        private bool _isEditing;
 
         public ObservableCollection<Project> Workspaces { get; set; } = new ObservableCollection<Project>();
 
@@ -154,6 +156,18 @@ namespace WorkspacesEditor.ViewModels
             lastUpdatedTimer.Interval = 1000;
             lastUpdatedTimer.Elapsed += LastUpdatedTimerElapsed;
             lastUpdatedTimer.Start();
+
+            try
+            {
+                // Picks up tab URLs pushed from the browser extension's native host and applies them
+                // to the browser app in the workspace currently being edited.
+                _browserTabSyncWatcher = new BrowserTabSyncWatcher();
+                _browserTabSyncWatcher.TabsSynced += OnBrowserTabsSynced;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning($"Could not start the browser tab sync watcher: {ex.Message}");
+            }
         }
 
         public void Initialize()
@@ -268,6 +282,7 @@ namespace WorkspacesEditor.ViewModels
                 {
                     project.UpdateAfterLaunchAndEdit(projectBeforeLaunch);
                     project.EditorWindowTitle = Properties.Resources.EditWorkspace;
+                    _isEditing = true;
                     editPage.DataContext = project;
                     CheckShortcutPresence(project);
                     project.Initialize(App.GetCurrentTheme());
@@ -289,6 +304,7 @@ namespace WorkspacesEditor.ViewModels
         public void EditProject(Project selectedProject, bool isNewlyCreated = false)
         {
             editPage = new ProjectEditor(this);
+            _isEditing = true;
 
             SetEditedProject(selectedProject);
             if (!isNewlyCreated)
@@ -383,6 +399,7 @@ namespace WorkspacesEditor.ViewModels
 
         public void SwitchToMainView()
         {
+            _isEditing = false;
             _mainWindow.SwitchToMainView();
             SearchTerm = string.Empty;
             OnPropertyChanged(new PropertyChangedEventArgs(nameof(SearchTerm)));
@@ -473,8 +490,54 @@ namespace WorkspacesEditor.ViewModels
             }
         }
 
+        private void OnBrowserTabsSynced(object sender, BrowserTabSyncData data)
+        {
+            // FileSystemWatcher raises on a background thread; touch the UI-bound models on the UI thread.
+            System.Windows.Application.Current?.Dispatcher.Invoke(() => ApplyBrowserTabSync(data));
+        }
+
+        private void ApplyBrowserTabSync(BrowserTabSyncData data)
+        {
+            if (!_isEditing || editPage?.DataContext is not Project project)
+            {
+                Logger.LogInfo("Browser tab sync received, but no workspace is being edited. Ignoring.");
+                return;
+            }
+
+            var browserApps = project.Applications.Where(app => MatchesBrowser(app, data.Browser)).ToList();
+            if (browserApps.Count == 0)
+            {
+                Logger.LogWarning($"Browser tab sync received, but the edited workspace has no '{data.Browser}' window to apply it to.");
+                return;
+            }
+
+            foreach (var app in browserApps)
+            {
+                app.SetCommandLineArguments(data.CommandLineArguments);
+            }
+
+            Logger.LogInfo($"Applied {data.Urls.Count} synced tab(s) to {browserApps.Count} '{data.Browser}' app(s) in the edited workspace.");
+        }
+
+        private static bool MatchesBrowser(Models.Application app, string browser)
+        {
+            return browser switch
+            {
+                "chrome" => app.IsChrome,
+                "msedge" => app.IsEdge,
+                _ => app.IsEdge || app.IsChrome,
+            };
+        }
+
         public void Dispose()
         {
+            if (_browserTabSyncWatcher != null)
+            {
+                _browserTabSyncWatcher.TabsSynced -= OnBrowserTabsSynced;
+                _browserTabSyncWatcher.Dispose();
+                _browserTabSyncWatcher = null;
+            }
+
             GC.SuppressFinalize(this);
         }
 
