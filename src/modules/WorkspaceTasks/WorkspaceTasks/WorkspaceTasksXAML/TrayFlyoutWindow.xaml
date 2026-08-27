@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<winuiex:WindowEx
+    x:Class="WorkspaceTasks.TrayFlyoutWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="using:WorkspaceTasks.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:winuiex="using:WinUIEx"
+    mc:Ignorable="d">
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+
+    <Grid x:Name="RootPanel" Padding="16" RowSpacing="12">
+        <Grid.Resources>
+            <converters:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+            <converters:EmptyStringToVisibilityConverter x:Key="EmptyStringToVisibility" />
+
+            <Style x:Key="StretchedListViewItemStyle" TargetType="ListViewItem">
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="MinHeight" Value="0" />
+                <Setter Property="Padding" Value="4,2" />
+            </Style>
+
+            <DataTemplate x:Key="FlyoutTaskTemplate">
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <FontIcon
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        FontSize="14"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Glyph="&#xE76F;"
+                        ToolTipService.ToolTip="Drag to reorder" />
+
+                    <CheckBox
+                        Grid.Column="1"
+                        MinWidth="0"
+                        VerticalAlignment="Center"
+                        IsChecked="{Binding IsDone, Mode=TwoWay}" />
+
+                    <TextBlock
+                        Grid.Column="2"
+                        VerticalAlignment="Center"
+                        Text="{Binding Title}"
+                        TextTrimming="CharacterEllipsis" />
+
+                    <Button
+                        Grid.Column="3"
+                        Width="32"
+                        Height="32"
+                        Padding="0"
+                        VerticalAlignment="Center"
+                        Command="{Binding DataContext.LaunchWorkspaceCommand, ElementName=RootPanel}"
+                        CommandParameter="{Binding}"
+                        ToolTipService.ToolTip="Launch linked workspace"
+                        Visibility="{Binding HasWorkspace, Converter={StaticResource BoolToVisibility}}">
+                        <FontIcon FontSize="14" Glyph="&#xE7AC;" />
+                    </Button>
+
+                    <Button
+                        Grid.Column="4"
+                        Width="32"
+                        Height="32"
+                        Padding="0"
+                        VerticalAlignment="Center"
+                        Command="{Binding DataContext.LaunchWorkspaceInNewDesktopCommand, ElementName=RootPanel}"
+                        CommandParameter="{Binding}"
+                        ToolTipService.ToolTip="Launch in a new virtual desktop"
+                        Visibility="{Binding HasWorkspace, Converter={StaticResource BoolToVisibility}}">
+                        <FontIcon FontSize="14" Glyph="&#xE7C4;" />
+                    </Button>
+                </Grid>
+            </DataTemplate>
+        </Grid.Resources>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock
+                VerticalAlignment="Center"
+                Style="{ThemeResource BodyStrongTextBlockStyle}"
+                Text="Workspace Tasks" />
+            <Button
+                Grid.Column="1"
+                Click="OpenFullApp_Click"
+                ToolTipService.ToolTip="Open the full app">
+                <FontIcon FontSize="14" Glyph="&#xE8A7;" />
+            </Button>
+        </Grid>
+
+        <TextBox
+            Grid.Row="1"
+            x:Name="QuickAddBox"
+            KeyDown="QuickAddBox_KeyDown"
+            PlaceholderText="Add a task and press Enter…"
+            Text="{Binding NewTaskTitle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+        <ListView
+            Grid.Row="2"
+            AllowDrop="True"
+            CanDragItems="True"
+            CanReorderItems="True"
+            ItemContainerStyle="{StaticResource StretchedListViewItemStyle}"
+            ItemTemplate="{StaticResource FlyoutTaskTemplate}"
+            ItemsSource="{Binding ActiveTasks}"
+            SelectionMode="None" />
+
+        <TextBlock
+            Grid.Row="3"
+            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+            Style="{ThemeResource CaptionTextBlockStyle}"
+            Text="{Binding StatusMessage}"
+            TextWrapping="Wrap"
+            Visibility="{Binding StatusMessage, Converter={StaticResource EmptyStringToVisibility}}" />
+    </Grid>
+</winuiex:WindowEx>
